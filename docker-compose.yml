@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # 1. Authoritative Relational Database with pgvector Extension
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: smart_campus_postgres
+    environment:
+      POSTGRES_DB: smart_campus
+      POSTGRES_USER: campus_admin
+      POSTGRES_PASSWORD: campus_secure_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./drizzle/migrations/0000_smart_campus.sql:/docker-entrypoint-initdb.d/01_init.sql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U campus_admin -d smart_campus"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. NoSQL Activity Event Document Store
+  mongodb:
+    image: mongo:7.0
+    container_name: smart_campus_mongodb
+    environment:
+      MONGO_INITDB_DATABASE: smart_campus_events
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 3. Next.js Full-Stack Application
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smart_campus_web
+    environment:
+      DATABASE_URL: "postgresql://campus_admin:campus_secure_password@postgres:5432/smart_campus"
+      MONGODB_URI: "mongodb://mongodb:27017/smart_campus_events"
+      GEMINI_API_KEY: "${GEMINI_API_KEY}"
+      NODE_ENV: "production"
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  mongodata:

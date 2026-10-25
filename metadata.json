@@ -1,0 +1,6 @@
+{
+  "name": "Smart Campus Resource & Maintenance Management System",
+  "description": "An academic DBMS Level 3 platform with PostgreSQL relational modeling, MongoDB outbox activity events, pgvector semantic search, and role-based operations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

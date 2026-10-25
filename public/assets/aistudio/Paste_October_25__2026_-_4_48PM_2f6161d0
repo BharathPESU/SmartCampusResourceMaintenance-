@@ -1,0 +1,1294 @@
+# MASTER PROMPT — BUILD THE COMPLETE SMART CAMPUS RESOURCE & MAINTENANCE MANAGEMENT SYSTEM
+
+## 1. YOUR ROLE
+
+Act as a senior full-stack software architect, senior Next.js engineer, database architect, PostgreSQL specialist, MongoDB engineer, UI/UX designer, security engineer, and QA automation engineer.
+
+Your task is to design, implement, test, and document a complete, working, full-stack web application titled:
+
+**Smart Campus Resource & Maintenance Management System**
+
+This application is an academic DBMS Level 3 experiential-learning project. It must demonstrate realistic business workflows, a well-designed relational database, a NoSQL database, vector similarity search, advanced DBMS concepts, database–application integration, authorization, testing, and professional documentation.
+
+Do not create a basic CRUD application, a static dashboard, a frontend-only prototype, or a collection of mock screens.
+
+Build the actual application with functioning backend operations and persistent database integrations.
+
+## 2. SOURCE DOCUMENTS AND REQUIREMENTS
+
+I am providing two reference documents:
+
+1. `DBMS Level 3 Project Requirements draft.pdf`
+2. `Smart_Campus_ER_Diagram.docx`
+
+Read both documents carefully before implementation.
+
+Treat these documents as the primary source of truth for the original requirements and entity relationships.
+
+Preserve the nine original entities in the ER diagram:
+
+- BUILDING
+- ROOM
+- ASSET
+- FACILITY
+- STAFF
+- USER
+- COMPLAINT
+- BOOKING
+- CONFIRMATION
+
+The supplied ER diagram uses Chen notation and identifies primary-key attributes, relationships, cardinalities and several attribute types.
+
+Use it as the foundation of the implementation. You may correct incomplete relationships and normalize the relational schema where necessary, but document each significant design improvement and its justification. Do not silently remove the original entities or invent a completely unrelated project.
+
+### Assignment requirements that must be satisfied
+
+The application must include:
+
+- A functional web application using Next.js.
+- A backend/API layer connected to actual databases.
+- A relational SQL database.
+- A NoSQL database.
+- A vector similarity search implementation, as the recommended extension to the database design.
+- ER diagram and relational schema documentation.
+- Primary keys, foreign keys, constraints, indexes and appropriate validation.
+- SQL DDL operations: CREATE, ALTER and DROP.
+- SQL DML operations: INSERT, UPDATE, DELETE and SELECT.
+- JOIN, GROUP BY, HAVING, ORDER BY, aggregate functions and subqueries.
+- At least four genuinely implemented advanced database concepts.
+- Authentication and authorization with at least two user roles.
+- Secure handling of credentials and environment variables.
+- A functional frontend with real database integration.
+- Git/GitHub support and setup documentation.
+- Test cases, results, screenshots and a demonstration-ready project.
+
+Do not treat inclusion of a technology or feature in the package configuration as proof that it has been implemented. Every required feature must have working code, supporting database objects where applicable, and a verifiable test or demonstration.
+
+## 3. NON-NEGOTIABLE TECHNICAL STACK
+
+Use the following stack.
+
+### Frontend
+
+- Next.js App Router.
+- TypeScript with strict type checking.
+- Tailwind CSS.
+- shadcn/ui for reusable interface components.
+- Lucide icons.
+- Recharts for analytical dashboards.
+- React Hook Form and Zod for validated forms.
+- A consistent responsive design system.
+
+Use current mutually compatible stable package versions available in the build environment. Avoid obsolete APIs and unnecessary dependencies.
+
+### Backend
+
+- Next.js Route Handlers for REST-style API endpoints.
+- Server Components for server-rendered pages and data access where suitable.
+- Server Actions only where they provide a clear benefit.
+- A service layer containing business logic.
+- A repository/data-access layer containing database operations.
+- Zod schemas for server-side request validation.
+- Centralized error handling and structured server logs.
+
+The required Next.js application must be the actual application framework, not just a name in the documentation.
+
+If the current environment cannot run Next.js natively, do not silently substitute Vite or a standalone React application. Explain the limitation and produce a complete Next.js-compatible project that can be exported and run in a supported environment.
+
+### Relational database
+
+Use PostgreSQL as the source of truth for structured business data.
+
+Use:
+
+- PostgreSQL.
+- Drizzle ORM.
+- Explicit SQL migrations.
+- Raw SQL migrations for advanced database features not fully represented by the ORM.
+- `pgvector` for vector storage and similarity search.
+- PostgreSQL exclusion constraints for booking conflict prevention.
+
+### NoSQL database
+
+Use MongoDB with the official MongoDB Node.js driver.
+
+Use MongoDB for flexible activity-event documents and activity timelines. Do not duplicate the entire relational database in MongoDB.
+
+### Vector search
+
+Use the PostgreSQL `pgvector` extension.
+
+Store embeddings for complaint descriptions and selected historical resolution notes. Link each vector to its corresponding relational record.
+
+Use a supported embedding model available in the runtime, preferably through a server-side Gemini embedding integration. Make the embedding model and vector dimension configurable, and keep them consistent throughout the implementation.
+
+Do not expose API keys in frontend code. If the embedding API is unavailable, preserve all core application functionality and report that semantic search needs configuration.
+
+### Authentication
+
+Use Better Auth with its PostgreSQL integration if compatible with the selected Next.js and Drizzle versions.
+
+Use the library's documented authentication and session-management flow rather than hand-writing password or session security.
+
+Store application profiles and authorization roles in PostgreSQL, relating application profile IDs to the authenticated user IDs.
+
+Implement email/password login and logout. Add Google sign-in only if its OAuth credentials are configured. Never claim Google sign-in is operational when it has not been configured and tested.
+
+### Development and testing
+
+- Git and GitHub.
+- Docker Compose for local PostgreSQL with pgvector and MongoDB.
+- Vitest for unit and integration tests where appropriate.
+- Playwright for end-to-end browser tests.
+- An explicit development environment example.
+- Repeatable database migrations and seed scripts.
+
+Use the Google AI Studio server environment and secret configuration facilities where available. External database connections must use secured network connections and server-side environment variables.
+
+Do not use Firebase Firestore as a replacement for PostgreSQL and MongoDB. The assignment specifically needs visible SQL and NoSQL implementation.
+
+## 4. ARCHITECTURE
+
+Implement a modular monolith with clearly separated application modules.
+
+Use this logical architecture:
+
+User interface
+→ Next.js server components and API endpoints
+→ authentication and authorization
+→ request validation
+→ application service layer
+→ data-access/repository layer
+→ PostgreSQL, MongoDB and pgvector.
+
+The responsibilities of each layer must be clear.
+
+**Presentation layer:** Displays pages, dashboards, forms, tables and feedback.
+
+**Authentication and authorization layer:** Establishes identity, checks sessions and enforces permissions.
+
+**Service layer:** Contains booking rules, complaint assignment, status transitions and related business operations.
+
+**Repository layer:** Contains relational queries, MongoDB operations and vector retrieval.
+
+**PostgreSQL:** Owns all authoritative campus business records and transactional state.
+
+**MongoDB:** Stores flexible activity-event documents and event metadata.
+
+**pgvector:** Stores embeddings and supports semantic retrieval.
+
+**Outbox worker:** Reliably publishes committed database events into MongoDB.
+
+Keep the code modular without splitting the application into microservices.
+
+Avoid circular dependencies, duplicate business logic and database access scattered throughout UI components.
+
+## 5. DATABASE DESIGN
+
+Design, document and implement a complete relational schema based on the supplied ER diagram.
+
+Use UUID primary keys for application entities unless there is a documented reason to use another type. Use `timestamptz` for event timestamps and booking times.
+
+### A. Users and roles
+
+Implement authentication tables according to the selected authentication library.
+
+Create application profile and role tables, for example:
+
+- `user_profiles`
+- `roles`
+- `user_roles`
+
+The profile must link to the authenticated user and contain first name, optional middle name, last name, account status and timestamps.
+
+Provide roles for:
+
+- `CAMPUS_USER`
+- `MAINTENANCE_STAFF`
+- `ADMIN`
+
+Use relational role assignments or another documented normalized design that supports the required permissions.
+
+Do not create separate login credentials for staff profiles.
+
+### B. Buildings
+
+Create a `buildings` table with:
+
+- `building_id`
+- `building_name`
+- `location`
+- `total_floors`
+- `created_at`
+- `updated_at`
+
+Ensure building names and other identifiers follow appropriate uniqueness and validation rules.
+
+### C. Rooms
+
+Create a `rooms` table with:
+
+- `room_id`
+- `building_id`
+- `room_number`
+- `floor_no`
+- `room_type`
+- `capacity`
+- `status`
+- `created_at`
+- `updated_at`
+
+Requirements:
+
+- Every room belongs to a building.
+- A building can contain multiple rooms.
+- Room numbers must be unique within the same building.
+- Capacity must be greater than zero.
+- Floor numbers must fall within the building's declared floor range.
+- Use a foreign key for `building_id`.
+
+### D. Assets
+
+Create an `assets` table with:
+
+- `asset_id`
+- `room_id`
+- `asset_name`
+- `category`
+- `status`
+- `created_at`
+- `updated_at`
+
+Every asset must belong to a room.
+
+Support meaningful status values such as operational, maintenance required and retired. Enforce valid statuses in the database.
+
+### E. Facilities
+
+Create a `facilities` table with:
+
+- `facility_id`
+- `building_id`
+- `facility_name`
+- `operating_hours`
+- `status`
+- timestamps
+
+A building can provide multiple facilities, consistent with the supplied ER diagram.
+
+For the first implementation, facility operating hours are informational. Do not silently add facility reservations to the booking workflow; room reservations are the defined reservation scope unless the documentation explicitly introduces and tests a separate facility-booking feature.
+
+### F. Staff
+
+Create a `staff_profiles` table containing:
+
+- `staff_id`
+- `user_id`
+- `facility_id`
+- `supervisor_staff_id`
+- `designation`
+- `salary`, if retained from the supplied ER model
+- timestamps
+
+Requirements:
+
+- A staff profile references an authenticated user profile.
+- Staff members may belong to a facility.
+- A staff member may supervise other staff members.
+- Use a self-referencing foreign key for the supervisor relationship.
+- Prevent a staff member from supervising themselves.
+- Only authorized administrators can view or modify salary information, if that field is included.
+
+Do not duplicate the person's name and email across the identity and staff records.
+
+### G. Facility usage
+
+The supplied diagram indicates a many-to-many relationship between users and facilities.
+
+Represent this relationship using an associative table such as `facility_usage`:
+
+- `user_id`
+- `facility_id`
+- `used_at`, if usage history is being recorded
+- other justified usage attributes
+
+Use appropriate primary-key and foreign-key constraints.
+
+### H. Complaints
+
+Create a `complaints` table with:
+
+- `complaint_id`
+- `raised_by_user_id`
+- `asset_id`
+- `description`
+- `priority`
+- `status`
+- `assigned_staff_id`
+- `date_raised`
+- `updated_at`
+- `resolved_at`
+- `resolution_notes`
+
+Every complaint must reference the user who raised it and the affected asset.
+
+Implement a maintenance lifecycle such as:
+
+`OPEN → ASSIGNED → IN_PROGRESS → RESOLVED`
+
+Allow reopening a resolved complaint when authorized and justified. Support cancellation only according to documented rules.
+
+Implement authorization so users can see their own complaints, maintenance staff can access appropriately assigned work, and administrators can manage the wider workflow.
+
+Record important status transitions as auditable events.
+
+### I. Bookings
+
+Create a `bookings` table with:
+
+- `booking_id`
+- `user_id`
+- `room_id`
+- `start_time`
+- `end_time`
+- `purpose`
+- `status`
+- `created_at`
+- `updated_at`
+- `cancelled_at`, where applicable
+
+Booking statuses should include at least `PENDING`, `CONFIRMED` and `CANCELLED`.
+
+Requirements:
+
+- Every booking references an authenticated user.
+- Every booking references a room.
+- End time must be later than start time.
+- Cancelled bookings must not block future reservations.
+- Users cannot create conflicting bookings for the same room.
+- Users cannot cancel another user's booking unless authorized.
+- The system must respect time zones and avoid treating the browser's displayed time as the authoritative booking rule.
+
+**Critical concurrency requirement:** Prevent double-booking at the database level. A client-side availability check alone is not sufficient.
+
+Implement a PostgreSQL exclusion constraint using `btree_gist` and an appropriate time range, or an equally rigorous database-enforced solution.
+
+For example, where applicable, use a half-open reservation range `[start_time, end_time)` so consecutive reservations can touch without overlapping.
+
+Test simultaneous booking attempts and confirm that only a valid reservation can succeed.
+
+### J. Confirmations
+
+Create a `confirmations` table with:
+
+- `confirmation_id`
+- `booking_id`
+- `issue_date`
+- `confirmation_code`
+- `created_at`
+
+Use a foreign key to the relevant booking.
+
+Treat the confirmation as one record per successful booking unless a documented requirement establishes otherwise. Make the confirmation code unique.
+
+Generate confirmations only when the booking reaches the appropriate successful state.
+
+### K. Event outbox
+
+Create an `outbox_events` table in PostgreSQL:
+
+- `event_id`
+- `event_type`
+- `aggregate_type`
+- `aggregate_id`
+- `payload` as JSONB
+- `status`
+- `attempts`
+- `created_at`
+- `processed_at`
+- `last_error`
+
+Use this outbox to publish important committed business events to MongoDB.
+
+A booking transaction should not fail simply because MongoDB is temporarily unavailable after PostgreSQL has committed. The event should remain available for retry.
+
+### L. Complaint embeddings
+
+Create a `complaint_embeddings` table containing:
+
+- a complaint reference or another unambiguous source-record identifier
+- embedding vector
+- embedding model
+- content hash
+- created timestamp
+
+Use `vector` with a fixed dimension supported by the selected embedding model.
+
+Add appropriate indexes for similarity retrieval as justified by the dataset size.
+
+Store embeddings in PostgreSQL through pgvector rather than maintaining an unrelated standalone vector database.
+
+## 6. MONGODB DESIGN
+
+Create a MongoDB database for the application activity and event stream.
+
+Use a collection called `activity_events`.
+
+Each event document should support fields such as:
+
+- `eventId`
+- `eventType`
+- `occurredAt`
+- `actorUserId`
+- `aggregateType`
+- `aggregateId`
+- `summary`
+- `metadata`
+- `schemaVersion`
+
+Examples:
+
+- `BOOKING_CREATED`
+- `BOOKING_CONFIRMED`
+- `BOOKING_CANCELLED`
+- `COMPLAINT_CREATED`
+- `COMPLAINT_ASSIGNED`
+- `COMPLAINT_STATUS_CHANGED`
+- `ASSET_STATUS_CHANGED`
+
+Use a unique index on the event ID to make event delivery idempotent.
+
+Add useful indexes for actor, aggregate, event type and date.
+
+Implement at least one meaningful MongoDB aggregation pipeline, such as:
+
+- Number of complaints created per day.
+- Maintenance activity by staff member.
+- Event counts by category over a selected time period.
+
+Use the outbox pattern for reliable delivery. Implement a retry mechanism and duplicate-event prevention.
+
+Provide a documented local command to run the event worker. Ensure the core application remains usable if MongoDB is temporarily unavailable.
+
+Do not claim that the worker is running in production unless it has actually been deployed and verified.
+
+## 7. VECTOR SIMILARITY SEARCH
+
+Implement functional semantic search for campus maintenance complaints.
+
+The workflow should be:
+
+1. Select a complaint description and, where appropriate, its resolution notes.
+2. Generate an embedding through a server-side embedding provider.
+3. Store the embedding with its source-record reference in PostgreSQL.
+4. Accept a natural-language search query.
+5. Generate a query embedding using the same model and dimension.
+6. Retrieve similar records using pgvector.
+7. Display the original complaint, asset, historical status, relevant resolution and similarity score.
+
+For example, a user searches:
+
+"Ventilation fan is not working."
+
+The search should be capable of finding relevant historical descriptions such as:
+
+"Air circulation unit stopped operating."
+
+Use cosine distance or another clearly documented similarity metric.
+
+Choose an appropriate index for the expected dataset size and document its purpose.
+
+Do not present vector-search results as guaranteed factual matches. Label them as similarity-based suggestions.
+
+Provide a keyword search option as a separate and clearly labelled alternative.
+
+If embedding credentials are unavailable, show a transparent setup message and retain the rest of the application functionality. Do not invent vector results.
+
+## 8. ADVANCED DBMS REQUIREMENTS
+
+Implement and test at least the following six concepts, with supporting documentation.
+
+### 1. Transactions
+
+Use PostgreSQL transactions for business operations that must be atomic.
+
+A successful booking operation should create its booking, confirmation when appropriate, and outbox event within a single transaction.
+
+If the operation fails before commit, no partial booking or confirmation should remain.
+
+### 2. Constraints and indexing
+
+Implement:
+
+- Primary keys.
+- Foreign keys.
+- NOT NULL constraints.
+- UNIQUE constraints.
+- CHECK constraints.
+- Booking overlap prevention.
+- Useful indexes for frequent queries.
+- An appropriate vector index where warranted.
+
+Explain why each important constraint or index exists.
+
+### 3. Triggers
+
+Implement actual PostgreSQL triggers for useful database responsibilities, such as automatically maintaining `updated_at` or recording complaint status-transition history.
+
+Do not implement pointless triggers just to satisfy the rubric.
+
+### 4. Views
+
+Create useful database views such as:
+
+- `open_complaints_view`
+- `room_utilization_view`
+- `asset_maintenance_summary_view`
+
+Define and demonstrate them using actual SQL.
+
+### 5. Stored function
+
+Implement at least one meaningful PostgreSQL stored function with a well-defined responsibility and appropriate return value.
+
+Document when the application calls the function and what its database-level role is.
+
+### 6. Full-text or vector similarity search
+
+Implement functional PostgreSQL full-text search or pgvector similarity search, preferably both where practical.
+
+The semantic search must use actual stored vectors and actual PostgreSQL similarity queries.
+
+### Additional requirements
+
+Prepare SQL files that demonstrate:
+
+- CREATE.
+- ALTER.
+- DROP.
+- INSERT.
+- UPDATE.
+- DELETE.
+- SELECT.
+- INNER JOIN and LEFT JOIN.
+- GROUP BY.
+- HAVING.
+- ORDER BY.
+- COUNT, SUM, AVG, MIN and MAX where meaningful.
+- Subqueries and aggregate reports.
+
+Provide safe educational examples for DROP. Do not allow an ordinary frontend request to execute arbitrary SQL.
+
+Create MongoDB aggregation demonstrations as well.
+
+Put the important database queries in clearly named SQL files that can be inspected and run during the project demonstration.
+
+## 9. APPLICATION MODULES AND PAGES
+
+Build a consistent, responsive interface for desktop, tablet and mobile browsers.
+
+### A. Public and authentication pages
+
+Implement:
+
+- Login page.
+- Logout action.
+- Registration or controlled account provisioning.
+- Session handling.
+- Unauthorized-access page.
+- Not-found page.
+- Useful loading and error states.
+
+Do not expose administrative registration to the public.
+
+### B. Main dashboard
+
+Create a role-aware dashboard with actual database-backed metrics.
+
+Include:
+
+- Total buildings.
+- Total rooms.
+- Active assets.
+- Available rooms.
+- Active bookings.
+- Open complaints.
+- High-priority complaints.
+- Maintenance work awaiting assignment.
+- Room utilization by time period.
+- Complaint trends.
+- Recent activity events.
+
+Use accurate aggregate queries. Clearly distinguish zero results from failed or unavailable database connections.
+
+### C. Building management
+
+Implement:
+
+- Building listing.
+- Search and filtering.
+- Pagination.
+- Building details.
+- Create, edit and permitted delete operations.
+- Related rooms and facilities.
+
+Prevent deletion where existing dependencies would make it invalid unless an explicit safe archival policy exists.
+
+### D. Room management
+
+Implement:
+
+- Room list and details.
+- Building filter.
+- Capacity filter.
+- Room type and status filters.
+- Room creation and editing.
+- Room status management.
+- Related assets.
+- Booking history.
+- Availability search by date and time.
+
+Validate room numbers, capacity, floor number and all foreign-key relationships.
+
+### E. Asset management
+
+Implement:
+
+- Asset list.
+- Asset details.
+- Search and category filters.
+- Asset creation and editing.
+- Asset status management.
+- Room assignment.
+- Related complaint history.
+
+Ensure users cannot manipulate the asset status through an unauthorized endpoint.
+
+### F. Facility management
+
+Implement:
+
+- Facility listing.
+- Facility details.
+- Operating-hours display.
+- Building association.
+- Authorized creation and editing.
+- Facility usage reports.
+
+### G. Booking management
+
+Implement:
+
+- Availability search.
+- Select-room workflow.
+- Booking form.
+- Booking confirmation.
+- Booking history.
+- Upcoming and past bookings.
+- Booking cancellation when permitted.
+- Booking details.
+- Filters by room, user, status and date.
+
+Display helpful messages for conflicting reservations.
+
+All booking mutations must use backend validation and database-enforced integrity, not local browser state.
+
+### H. Complaint and maintenance management
+
+Implement:
+
+- Raise complaint form.
+- Complaint list.
+- Complaint details.
+- Priority and status filters.
+- Assignment to staff.
+- Status-transition workflow.
+- Resolution notes.
+- Reopening where authorized.
+- Asset and room context.
+- Maintenance timelines.
+- Status-change audit history.
+
+Users should only see records permitted by their role.
+
+### I. Staff management
+
+Implement:
+
+- Staff directory.
+- Staff details.
+- Designation and facility information.
+- Supervisor relationship.
+- Assigned complaint workload.
+- Authorized assignment and editing.
+- Administrative-only salary visibility if salary is included.
+
+Do not make salary information visible to ordinary campus users.
+
+### J. Analytics and reports
+
+Create a useful analytics dashboard with date-range filters.
+
+Include:
+
+- Most frequently booked rooms.
+- Room utilization rates.
+- Booking counts by day or time period.
+- Average complaint resolution time.
+- Open complaints grouped by priority.
+- Complaints by asset category.
+- Assets with repeated maintenance issues.
+- Staff workload.
+- MongoDB activity-event aggregations.
+
+Use actual SQL and MongoDB queries. Do not hard-code chart values.
+
+If sample data is being displayed, it must come from the seeded database.
+
+### K. Semantic complaint search
+
+Create a dedicated search page.
+
+Include:
+
+- Natural-language search.
+- Keyword-search option.
+- Search-result list.
+- Similarity score when semantic search is enabled.
+- Links to historical complaint details.
+- Asset and resolution context.
+- A clear message when embedding configuration is incomplete.
+
+### L. DBMS demonstration lab
+
+Create an administrator-accessible **Database Lab** page specifically for academic evaluation.
+
+Display:
+
+- Database architecture.
+- Selected database technologies and justifications.
+- ER diagram link or visual representation.
+- Relational-schema summary.
+- Advanced DBMS concepts implemented.
+- Named SQL demonstration examples.
+- MongoDB aggregation examples.
+- Vector similarity search explanation.
+- Indexes, views, triggers and stored functions.
+- Database health and configuration status.
+
+Allow authorized users to execute only predefined, parameterized demonstration operations.
+
+Do not provide arbitrary SQL execution through an internet-facing endpoint.
+
+Where necessary, show read-only query examples and their actual results.
+
+## 10. API DESIGN
+
+Implement appropriate REST-style API endpoints or equivalent Next.js server operations.
+
+At minimum, cover:
+
+- Authentication and session operations.
+- Users and role assignments.
+- Buildings.
+- Rooms.
+- Room availability.
+- Bookings and cancellations.
+- Assets.
+- Facilities.
+- Complaints.
+- Complaint assignment and status changes.
+- Staff.
+- Dashboard metrics.
+- Analytics.
+- Semantic complaint search.
+- MongoDB activity-event reports.
+- Database health checks.
+
+Use consistent response shapes, appropriate HTTP status codes and useful error messages.
+
+Every mutation must validate input, enforce authorization, preserve data integrity, and return an accurate result.
+
+Do not expose stack traces, password hashes, secret values or database connection strings.
+
+Use pagination for large result sets and parameterized queries throughout.
+
+## 11. AUTHORIZATION MATRIX
+
+Enforce these rules on the server:
+
+### Campus user
+
+May:
+
+- View permitted buildings, rooms and facilities.
+- Check room availability.
+- Create bookings.
+- View their own bookings.
+- Cancel eligible bookings they own.
+- Create complaints.
+- View and track their own complaints.
+- Use permitted semantic search and resource-search functions.
+
+May not:
+
+- Assign maintenance staff.
+- Change another user's records.
+- Manage application roles.
+- View confidential staff salary details.
+- Access administrative database operations.
+
+### Maintenance staff
+
+May:
+
+- View appropriately assigned complaints.
+- View relevant assets and rooms.
+- Update permitted maintenance statuses.
+- Add resolution notes.
+- Complete assigned work.
+- View relevant maintenance analytics.
+
+May not:
+
+- Modify authentication credentials.
+- Assign arbitrary administrative roles.
+- Access confidential records outside their permissions.
+
+### Administrator
+
+May:
+
+- Manage buildings, rooms, assets and facilities.
+- Manage user profiles and role assignments.
+- Manage staff profiles and complaint assignment.
+- Access administrative reports.
+- Access permitted database demonstrations.
+- View database health diagnostics.
+
+Enforce these rules in server-side code and test direct API calls as well as UI navigation.
+
+## 12. UI/UX DESIGN DIRECTION
+
+Create a premium, professional campus-management product—not a generic starter template.
+
+Use a restrained visual system:
+
+- Deep navy or slate for navigation and main text.
+- White and subtle neutral surfaces.
+- A restrained green or teal accent.
+- Clean typography.
+- Comfortable spacing.
+- Clear table hierarchy.
+- Subtle borders and shadows.
+- Consistent border radius.
+- Carefully selected status colors.
+- Clear focus and hover states.
+
+Use a collapsible left sidebar on desktop and an appropriate mobile navigation pattern.
+
+The application shell should contain:
+
+- Sidebar with logo and navigation.
+- Top bar with page title or breadcrumbs.
+- Search entry point.
+- Notifications or activity indicator only when genuinely implemented.
+- User menu and logout.
+- Role indicator.
+- Main content area.
+
+The dashboard must prioritize information hierarchy and useful actions.
+
+Build reusable components:
+
+- Stat card.
+- Data table.
+- Search and filter toolbar.
+- Status badge.
+- Form field.
+- Confirmation dialog.
+- Date-range selector.
+- Empty state.
+- Error state.
+- Loading skeleton.
+- Pagination.
+- Toast or inline notification.
+
+Use accessible labels, keyboard navigation and responsive layouts.
+
+Do not use excessive gradients, unnecessary animations, giant headings, or decorative components that interfere with task completion.
+
+All primary buttons, dropdowns, tabs, filters, forms and table actions must work.
+
+Include confirmation dialogs for destructive operations and meaningful success or failure feedback after mutations.
+
+## 13. SECURITY REQUIREMENTS
+
+Implement security as part of the application, not as a final cosmetic step.
+
+Required protections:
+
+- Secure authentication and session management.
+- Server-side role and ownership checks.
+- Password handling by the selected authentication library.
+- Zod validation for incoming data.
+- Parameterized database queries.
+- Protection against unauthorized API mutations.
+- Secure and appropriately scoped cookies.
+- Environment variables for database and API credentials.
+- Safe error handling.
+- Restricted database permissions.
+- No secrets committed to Git.
+- No exposed administrative keys.
+- No arbitrary client-controlled SQL.
+- Appropriate access controls for staff and administrative data.
+
+Provide an `.env.example` file with placeholder values only.
+
+Never generate a real secret or put credentials directly in source code.
+
+Document how to configure production authentication URLs and allowed origins.
+
+## 14. DATABASE MIGRATIONS AND PROJECT SETUP
+
+Create working database migrations.
+
+The migration process must:
+
+1. Enable required PostgreSQL extensions.
+2. Create tables and enums.
+3. Define keys and constraints.
+4. Create indexes.
+5. Add the booking conflict constraint.
+6. Create triggers and stored functions.
+7. Create analytical views.
+8. Set up pgvector storage and retrieval support.
+9. Create the required MongoDB indexes through an initialization script.
+10. Maintain a clear and repeatable setup process.
+
+Use Drizzle for the supported application schema and queries, and SQL migrations for database-specific features when appropriate.
+
+Do not assume that defining a TypeScript interface creates a database table.
+
+Do not hide the database schema behind an ORM alone. The SQL definitions must be available for inspection.
+
+Provide these scripts where appropriate:
+
+- `dev`
+- `build`
+- `start`
+- `lint`
+- `typecheck`
+- `test`
+- `test:e2e`
+- `db:generate`
+- `db:migrate`
+- `db:seed`
+- `db:studio`, if supported
+- `worker:outbox`
+
+Make the setup and migration scripts match the code that actually exists.
+
+## 15. SAMPLE DATA AND DEMONSTRATION ACCOUNTS
+
+Provide a repeatable development seed script with realistic sample data for:
+
+- Several campus buildings.
+- Multiple rooms and room capacities.
+- Facilities.
+- Different asset categories.
+- Campus users.
+- Maintenance staff.
+- An administrator.
+- Bookings with valid time ranges.
+- Open and resolved complaints.
+- Staff assignments.
+- Booking confirmations.
+- Historical activity events where appropriate.
+
+The seed data must satisfy every foreign key, uniqueness rule and booking-overlap constraint.
+
+Include realistic examples for reports, semantic complaint search, and MongoDB aggregation.
+
+Provide a documented local development process for creating demo accounts and setting passwords.
+
+Store only password hashes through the authentication system. Do not insert plaintext passwords into the database.
+
+Never enable predictable demo credentials in production. If demo credentials are used locally, identify them as development-only.
+
+Do not use frontend hard-coded arrays as a substitute for the real database. A legitimate seed process must populate the database that the app actually queries.
+
+## 16. TESTING REQUIREMENTS
+
+Write actual tests.
+
+### Unit tests
+
+Test:
+
+- Booking validation.
+- Complaint status transitions.
+- Role and ownership authorization.
+- Request validation.
+- Application service error handling.
+
+### Database integration tests
+
+Test:
+
+- Primary-key uniqueness.
+- Foreign-key enforcement.
+- Check and unique constraints.
+- Invalid booking ranges.
+- Overlapping reservations.
+- Cancelled-booking availability.
+- Atomic booking and confirmation creation.
+- Failure rollback.
+- Outbox event generation and retries.
+- Vector retrieval when embedding support is configured.
+
+### MongoDB tests
+
+Test:
+
+- Event insertion.
+- Unique event IDs.
+- Duplicate delivery.
+- Activity aggregation.
+- Event-query filters.
+
+### End-to-end tests
+
+Test essential workflows:
+
+1. Login.
+2. View the dashboard.
+3. Find a room.
+4. Create a valid booking.
+5. Attempt a conflicting booking.
+6. Verify that the conflict is rejected.
+7. Cancel an eligible booking.
+8. Submit a complaint.
+9. Assign the complaint as an administrator.
+10. Update it as maintenance staff.
+11. Verify ownership-based access restrictions.
+12. View analytics.
+13. Run semantic search when configured.
+14. Verify an unauthorized user cannot access the Database Lab.
+
+Report which tests have actually executed and passed.
+
+Do not claim tests succeeded if the environment did not run them.
+
+## 17. DOCUMENTATION DELIVERABLES
+
+Create a complete `docs/` folder and a root `README.md`.
+
+Include:
+
+### README.md
+
+- Project title and description.
+- Problem statement.
+- Objectives and scope.
+- Features.
+- Technology stack.
+- Architecture.
+- Prerequisites.
+- Installation.
+- Environment configuration.
+- Database setup.
+- Migration and seed instructions.
+- Authentication setup.
+- Worker setup.
+- Test commands.
+- Troubleshooting.
+- Deployment instructions.
+- Limitations and future enhancements.
+
+### docs/architecture.md
+
+Describe the system architecture, request flow, module boundaries, database responsibilities and event-delivery design.
+
+### docs/erd.md
+
+Document the corrected ER diagram and all cardinalities.
+
+Preserve the supplied diagram's original entities, and explain added relationships.
+
+Provide a renderable Mermaid ER diagram or another source format that can be maintained alongside the documentation.
+
+### docs/relational-schema.md
+
+Document each relational table with its columns, data types, primary keys, foreign keys, constraints and relationships.
+
+### docs/data-dictionary.md
+
+Describe each important attribute, permitted values and business meaning.
+
+### docs/database-justification.md
+
+Explain why PostgreSQL, MongoDB and pgvector were chosen and what belongs in each.
+
+### docs/advanced-dbms.md
+
+Explain the implemented transactions, triggers, stored functions, views, indexes, overlap constraint, NoSQL aggregation and vector retrieval.
+
+Include actual object names, SQL examples and testing evidence.
+
+### docs/queries.sql
+
+Provide the assignment's important DDL and DML examples, joins, grouping, aggregates, subqueries and analytical queries.
+
+Include a safe example of DROP on a dedicated demonstration object. Do not drop live application tables.
+
+### docs/mongodb-aggregation.js
+
+Provide runnable MongoDB aggregation examples.
+
+### docs/vector-search.md
+
+Document the embedding model, dimensionality, storage, similarity metric, indexing strategy, retrieval workflow and required configuration.
+
+### docs/testing.md
+
+Document test cases, expected results, executed results and known limitations.
+
+### docs/demo-script.md
+
+Provide a step-by-step demonstration plan for the evaluator, covering the problem, ER diagram, schema, SQL queries, advanced features, MongoDB, semantic search, UI, authentication and team contributions.
+
+### docs/limitations.md
+
+Explain any features requiring external credentials, infrastructure or further validation.
+
+## 18. GITHUB AND CODE QUALITY
+
+Generate a repository ready for GitHub.
+
+Include:
+
+- `.gitignore`
+- `.env.example`
+- `README.md`
+- Meaningful module boundaries.
+- Database migrations.
+- Test files.
+- Seed scripts.
+- Documentation.
+- A clean dependency list.
+- Clear commit suggestions for a two-member team.
+
+Do not include secrets, database dumps containing sensitive data or local build artifacts.
+
+Do not fabricate past Git commits or pretend the repository has been pushed to GitHub. Provide commands and instructions for the actual user to initialize and push the repository.
+
+## 19. DEPLOYMENT READINESS
+
+Prepare the application for deployment to a supported Node.js hosting environment, with Google Cloud Run as a documented option.
+
+Document the required production environment variables and service configuration.
+
+Use secure database connection settings and network-access policies.
+
+Document how PostgreSQL and MongoDB should be hosted and accessed.
+
+Do not assume local Docker database services are reachable from a deployed container.
+
+Ensure migrations are not destructively run on every application startup.
+
+Configure the outbox worker as a separately runnable process and document its production deployment separately from the web server.
+
+Keep embedding credentials server-side.
+
+Do not hard-code URLs, connection strings or secrets.
+
+## 20. QUALITY AND FAILURE-HANDLING RULES
+
+Follow these rules throughout development:
+
+1. Never use fake persistence or localStorage as the primary application database.
+2. Never silently replace the specified database architecture with Firebase Firestore.
+3. Never leave primary buttons or critical workflows as placeholders.
+4. Never display fabricated analytics as if they came from PostgreSQL.
+5. Never silently swallow database exceptions.
+6. Never claim that an external connection works without testing it.
+7. Never invent API keys, service credentials or deployed URLs.
+8. Never use client-side checks as the only booking conflict or authorization protection.
+9. Never implement an unrestricted SQL console for demonstration.
+10. Never sacrifice database integrity to make the UI appear functional.
+11. Never delete or redesign original ER entities without justification.
+12. Never leave the project without setup instructions or migrations.
+13. Never stop after creating a project plan or landing page.
+14. Never claim deployment, test execution or authentication integration is complete without verification.
+
+If something requires an external credential, build the integration, add the environment-variable instructions, show a clear configuration status, and continue building every feature that does not depend on that credential.
+
+If a database connection cannot be established in the current environment, do not fake successful reads and writes. Complete the code and migrations, provide the setup instructions, and make the missing configuration visible.
+
+## 21. IMPLEMENTATION ORDER
+
+Execute the work in this order while maintaining a coherent final application:
+
+Phase 1: Inspect both source documents and extract the original requirements.
+
+Phase 2: Finalize the corrected ER model and relational schema.
+
+Phase 3: Create the project structure, dependencies and database migrations.
+
+Phase 4: Implement authentication, roles, repositories and services.
+
+Phase 5: Implement booking, conflict prevention, confirmations, complaints, staff workflows and asset management.
+
+Phase 6: Implement the event outbox, MongoDB event pipeline and aggregation queries.
+
+Phase 7: Implement the vector-search pipeline and semantic search UI.
+
+Phase 8: Build the full Next.js interface and analytical dashboards.
+
+Phase 9: Add the DBMS demonstration lab and all documentation.
+
+Phase 10: Run available checks and tests, fix compilation errors, fix broken imports and routes, validate schema consistency, and verify important workflows.
+
+Do not ask me to approve every phase. Make reasonable engineering decisions based on the supplied requirements and proceed.
+
+## 22. FINAL ACCEPTANCE CRITERIA
+
+The application is complete only when the following are true:
+
+- It is a real Next.js application.
+- Its project source is organized and readable.
+- PostgreSQL schema and migrations are provided.
+- MongoDB event storage and aggregations are implemented.
+- pgvector semantic search is implemented and documented.
+- The supplied ER diagram's nine original entities are represented.
+- Correct relational relationships and constraints are enforced.
+- Booking conflicts are rejected at the database level.
+- The booking transaction and confirmation workflow are implemented.
+- Authentication and all role permissions are enforced server-side.
+- Users can perform real booking and maintenance workflows.
+- Dashboard figures come from actual database queries.
+- At least four advanced DBMS features are working and testable.
+- DDL, DML and required analytical SQL examples are documented.
+- The project includes automated tests and truthful test results.
+- Database setup and seed scripts are repeatable.
+- External integrations have documented configuration requirements.
+- The interface is responsive, polished and functional.
+- The README explains how to run the complete application.
+- The project is ready for local execution and subsequent GitHub submission.
+
+## 23. FINAL INSTRUCTION
+
+Start by reading the attached project requirements PDF and ER diagram DOCX.
+
+Then implement the entire application directly in the project workspace.
+
+Prioritize database correctness, a working backend, complete core workflows, the DBMS rubric, security and maintainable code. Build the professional UI as part of the same application.
+
+Create actual source files, SQL migrations, seed scripts, API endpoints, database integrations, tests and documentation.
+
+Use real implementation wherever possible. Do not respond with only architecture diagrams, suggested code snippets, a project plan or a description of what you would build.
+
+If the environment cannot complete an external setup automatically, implement everything that can be implemented and report precisely what configuration remains necessary.
+
+**Final objective: deliver a functional, database-driven Smart Campus Resource & Maintenance Management System that can be run, inspected, tested and demonstrated for the DBMS Level 3 project.**
